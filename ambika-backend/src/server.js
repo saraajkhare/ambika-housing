@@ -7,7 +7,15 @@ const enquiryRoutes = require("./routes/enquiry.routes");
 
 const app = express();
 
-app.use(cors());
+const cors = require("cors");
+
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"]
+}));
+
+app.options("*", cors()); // Enable pre-flight for all routes
 app.use(express.json());
 
 // ✅ MongoDB connection
