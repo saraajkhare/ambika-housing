@@ -7,7 +7,7 @@ const enquiryRoutes = require("./routes/enquiry.routes");
 
 const app = express();
 
-const cors = require("cors");
+
 
 app.use(cors({
   origin: "*",
