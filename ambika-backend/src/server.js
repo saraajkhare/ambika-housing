@@ -1,14 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const fetch = require("node-fetch");
-require("dotenv").config();
+
 
 const enquiryRoutes = require("./routes/enquiry.routes");
 
 const app = express();
-
-
 
 app.use(cors({
   origin: "*",
@@ -16,31 +13,27 @@ app.use(cors({
   allowedHeaders: ["Content-Type"]
 }));
 
-app.options("*", cors()); // Enable pre-flight for all routes
 app.use(express.json());
 
-// ✅ MongoDB connection
+// MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB error:", err));
 
-// test route
+// test
 app.get("/", (req, res) => {
   res.send("Ambika Backend is running 🚀");
 });
 
-// routes
 app.use("/api/enquiry", enquiryRoutes);
 
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`✅ Backend running on port ${PORT}`);
-});
-
+// ✅ CHAT ROUTE
 app.post("/api/chat", async (req, res) => {
   try {
     const { message, history } = req.body;
+
+    console.log("KEY:", process.env.CLAUDE_API_KEY); // debug
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -50,18 +43,8 @@ app.post("/api/chat", async (req, res) => {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-  model: "claude-3-haiku",
-  max_tokens: 500,
-        system: `
-You are a smart real estate assistant for AmarInfratech.
-
-Answer ONLY about:
-- Chikana, Dhamana, Tumdi plots
-- Pricing (approx)
-- Investment benefits
-
-Be short, helpful, and convert user into a lead.
-        `,
+        model: "claude-3-haiku",
+        max_tokens: 500,
         messages: [
           ...(history || []),
           { role: "user", content: message },
@@ -69,24 +52,21 @@ Be short, helpful, and convert user into a lead.
       }),
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("Claude API error:", errText);
-      return res.json({ reply: "API error, try again." });
-    }
-
     const data = await response.json();
-    console.log("Claude response:", data);
 
-    let reply = "Sorry, try again.";
+    console.log("Claude:", data);
 
-    if (data?.content?.length) {
-      reply = data.content.map(c => c.text).join(" ");
-    }
+    const reply = data?.content?.[0]?.text || "Sorry, try again.";
 
     res.json({ reply });
+
   } catch (err) {
-    console.error(err);
+    console.error("CHAT ERROR:", err);
     res.status(500).json({ reply: "Server error" });
   }
+});
+
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+  console.log(`✅ Backend running on port ${PORT}`);
 });
