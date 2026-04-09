@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const fetch = require("node-fetch");
 require("dotenv").config({ path: "../.env" });
 
 const enquiryRoutes = require("./routes/enquiry.routes");
@@ -49,8 +50,8 @@ app.post("/api/chat", async (req, res) => {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-3-haiku-20240307",
-        max_tokens: 500,
+  model: "claude-3-haiku",
+  max_tokens: 500,
         system: `
 You are a smart real estate assistant for AmarInfratech.
 
