@@ -33,7 +33,7 @@ app.post("/api/chat", async (req, res) => {
   try {
     const { message, history } = req.body;
 
-    console.log("KEY:", process.env.CLAUDE_API_KEY); // debug
+    console.log("Incoming message:", message);
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -43,8 +43,19 @@ app.post("/api/chat", async (req, res) => {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-3-haiku",
+        model: "claude-3-haiku-20240307",
         max_tokens: 500,
+        system: `
+You are a smart real estate assistant for AmarInfratech.
+
+Answer ONLY about:
+- Plots (Chikana, Dhamana, Tumdi)
+- Pricing (approx)
+- Investment benefits
+- Site visits
+
+Keep answers short, friendly, and sales-focused.
+        `,
         messages: [
           ...(history || []),
           { role: "user", content: message },
@@ -54,9 +65,14 @@ app.post("/api/chat", async (req, res) => {
 
     const data = await response.json();
 
-    console.log("Claude:", data);
+    console.log("Claude raw response:", data);
 
-    const reply = data?.content?.[0]?.text || "Sorry, try again.";
+    if (!data || data.error) {
+      console.error("Claude API error:", data);
+      return res.json({ reply: "Sorry, something went wrong." });
+    }
+
+    const reply = data?.content?.[0]?.text || "No response from AI.";
 
     res.json({ reply });
 
@@ -64,9 +80,4 @@ app.post("/api/chat", async (req, res) => {
     console.error("CHAT ERROR:", err);
     res.status(500).json({ reply: "Server error" });
   }
-});
-
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`✅ Backend running on port ${PORT}`);
 });
