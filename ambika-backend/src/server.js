@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const fetch = require("node-fetch");
-require("dotenv").config({ path: "../.env" });
+require("dotenv").config();
 
 const enquiryRoutes = require("./routes/enquiry.routes");
 
