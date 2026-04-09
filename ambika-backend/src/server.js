@@ -55,17 +55,11 @@ app.post("/api/chat", async (req, res) => {
 You are a smart real estate assistant for AmarInfratech.
 
 Answer ONLY about:
-- Plots (Chikana, Dhamana, Tumdi)
-- Pricing (approx, not exact)
+- Chikana, Dhamana, Tumdi plots
+- Pricing (approx)
 - Investment benefits
-- Site visits
 
-Tone:
-- Friendly
-- Short
-- Convincing
-
-Always try to convert user into a lead.
+Be short, helpful, and convert user into a lead.
         `,
         messages: [
           ...(history || []),
@@ -74,9 +68,20 @@ Always try to convert user into a lead.
       }),
     });
 
-    const data = await response.json();
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Claude API error:", errText);
+      return res.json({ reply: "API error, try again." });
+    }
 
-    const reply = data.content?.[0]?.text || "Sorry, try again.";
+    const data = await response.json();
+    console.log("Claude response:", data);
+
+    let reply = "Sorry, try again.";
+
+    if (data?.content?.length) {
+      reply = data.content.map(c => c.text).join(" ");
+    }
 
     res.json({ reply });
   } catch (err) {
