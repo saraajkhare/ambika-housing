@@ -34,3 +34,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/enquiry", enquiryRoutes);
 
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+  console.log(`🚀 Server is listening on port ${PORT}`);
+});
