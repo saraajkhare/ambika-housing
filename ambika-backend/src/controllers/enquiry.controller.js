@@ -34,6 +34,8 @@ exports.createEnquiry = async (req, res) => {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
           },
+          connectionTimeout: 5000, // Timeout to prevent infinite freeze
+          greetingTimeout: 5000,
         });
 
         await transporter.sendMail({

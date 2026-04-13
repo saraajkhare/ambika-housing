@@ -17,9 +17,15 @@ app.use(express.json());
 
 // MongoDB
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 5000, // Fail fast if DB down
+    socketTimeoutMS: 15000,
+  })
   .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB error:", err));
+  .catch((err) => {
+    console.error("❌ Critical MongoDB error: Failed to connect! Queries will fail.");
+    console.error(err.message);
+  });
 
 // test
 app.get("/", (req, res) => {
