@@ -25,7 +25,14 @@ exports.chatWithAI = async (req, res) => {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const rawKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = rawKey ? rawKey.trim() : null;
+    
+    // Safety Diagnostic
+    if (apiKey) {
+      console.log(`DEBUG: API Key identified (Length: ${apiKey.length}, Starts with: ${apiKey.substring(0, 13)})`);
+    }
+
     if (!apiKey) {
       console.error("ANTHROPIC_API_KEY is missing in backend .env");
       return res.status(500).json({ error: "AI Service is currently misconfigured. Please contact support." });
