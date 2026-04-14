@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 
 
 const enquiryRoutes = require("./routes/enquiry.routes");
+const chatRoutes = require("./routes/chat.routes");
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/enquiry", enquiryRoutes);
+app.use("/api/chat", chatRoutes);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
