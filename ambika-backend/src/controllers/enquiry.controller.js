@@ -1,6 +1,36 @@
 const Enquiry = require("../models/Enquiry.model");
 const nodemailer = require("nodemailer");
 
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "amarinfra@admin";
+const ADMIN_TOKEN = "amarinfra-secret-token-8f9d2";
+
+exports.adminLogin = async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (password === ADMIN_PASSWORD) {
+      return res.status(200).json({ success: true, token: ADMIN_TOKEN });
+    } else {
+      return res.status(401).json({ success: false, message: "Invalid password" });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+exports.getEnquiries = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || authHeader !== `Bearer ${ADMIN_TOKEN}`) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const enquiries = await Enquiry.find().sort({ createdAt: -1 });
+    res.status(200).json({ success: true, data: enquiries });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error fetching leads" });
+  }
+};
+
 exports.createEnquiry = async (req, res) => {
   try {
     console.log("BODY:", req.body);
